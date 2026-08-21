@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 const unsigned long POLLING_INTERVAL = 5000; // Milliseconds between requests
 unsigned long lastPollTime = 0;
 
