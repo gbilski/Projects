@@ -1,34 +1,73 @@
 #include <Arduino.h>
 
-const unsigned long POLLING_INTERVAL = 5000; // Milliseconds between requests
-unsigned long lastPollTime = 0;
+// Configurations for Speeduino Secondary Serial
+#define SPEEDUINO_SERIAL Serial1 
+#define BAUDRATE 115200          // Standard Speeduino secondary baud rate
+
+// Array and sizing configuration
+const int TOTAL_BYTES_EXPECTED = 126; // Total bytes including 3 header bytes
+uint8_t dataArray[TOTAL_BYTES_EXPECTED];
+int byteCount = 0;
+
+// Request timing control
+unsigned long lastRequestTime = 0;
+const unsigned long requestInterval = 50; // Request every 50ms (20Hz)
+bool waitingForResponse = false;
+unsigned long responseTimeout = 200;      // 200ms safety timeout
 
 void setup() {
-  Serial.begin(115200);   // Monitor/Debug output
-  Serial1.begin(115200);  // Connected to Speeduino Secondary Serial port
+  Serial.begin(115200);          // Debugging to PC
+  SPEEDUINO_SERIAL.begin(BAUDRATE); // Connection to Speeduino
+  Serial.println("Mega 2560 Speeduino Reader Initialized.");
 }
 
 void loop() {
-  unsigned long currentTime = millis();
-  
-  // Poll Speeduino periodically to avoid buffer flooding
-  if (currentTime - lastPollTime >= POLLING_INTERVAL) {
-    lastPollTime = currentTime;
-    Serial.println();
-    Serial.println("Start Read");
-    // Send the enhanced real-time data request command 'n'
-    Serial1.print('n');
+  unsigned long currentMillis = millis();
+
+  // 1. Send the 'n' command at regular intervals if not already waiting
+  if (!waitingForResponse && (currentMillis - lastRequestTime >= requestInterval)) {
+    SPEEDUINO_SERIAL.write(0x6E); // 0x6E is 'n' in hex
+    byteCount = 0;                // Reset counter for new packet
+    waitingForResponse = true;
+    lastRequestTime = currentMillis;
   }
-  
-  // Read incoming enhanced real-time data stream
-  if (Serial1.available() > 0) {
-    // Read the confirmation/response or parse the data stream block
-    byte incomingByte = Serial1.read();
+
+  // 2. Read incoming bytes asynchronously
+  while (SPEEDUINO_SERIAL.available() > 0) {
+    uint8_t incomingByte = SPEEDUINO_SERIAL.read();
+
+    // Prevent buffer overflow array bounds violation
+    if (byteCount < TOTAL_BYTES_EXPECTED) {
+      dataArray[byteCount] = incomingByte;
+      byteCount++;
+    }
+
+    // 3. Process array once all bytes are collected
+    if (byteCount >= TOTAL_BYTES_EXPECTED) {
+      processSpeeduinoData();
+      waitingForResponse = false; // Ready for next request
+    }
+  }
+
+  // 4. Safety Timeout: Reset if Speeduino drops packets or disconnects
+  if (waitingForResponse && (currentMillis - lastRequestTime > responseTimeout)) {
+    Serial.println("Error: Speeduino response timed out.");
+    waitingForResponse = false; 
+  }
+}
+
+void processSpeeduinoData() {
+  // Validate the 3-byte header echo
+  if (dataArray[0] == 0x6E && dataArray[1] == 0x32) {
+    Serial.print("Data Verified. Payload Length: ");
+    Serial.println(dataArray[2]); // Third byte contains payload size
     
-    // Print hex/dec values to your main serial monitor for debugging
-    Serial.println(incomingByte, HEX);
-    //Serial.print(" ");
+    // Example: Read RPM (Engine status structure shifts by 3 header bytes)
+    // In Speeduino structure, RPM is usually at payload offset 6 and 7 (bytes 9 and 10 in array)
+    uint16_t rpm = word(dataArray[10], dataArray[9]); 
+    Serial.print("RPM: ");
+    Serial.println(rpm);
+  } else {
+    Serial.println("Error: Invalid header received.");
   }
-    //Serial.println("END");
-//  delay(2000);
 }

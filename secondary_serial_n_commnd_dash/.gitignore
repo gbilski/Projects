@@ -12,6 +12,7 @@
 
 # Local configuration overrides (if used)
 private.ini
+platformio.ini
 
 # Hardware dump or compilation logs
 *.dump
