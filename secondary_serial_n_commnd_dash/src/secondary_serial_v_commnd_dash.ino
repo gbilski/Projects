@@ -63,10 +63,21 @@ void processSpeeduinoData() {
     Serial.println(dataArray[2]); // Third byte contains payload size
     
     // Example: Read RPM (Engine status structure shifts by 3 header bytes)
-    // In Speeduino structure, RPM is usually at payload offset 6 and 7 (bytes 9 and 10 in array)
-    uint16_t rpm = word(dataArray[10], dataArray[9]); 
-    Serial.print("RPM: ");
-    Serial.println(rpm);
+    // In Speeduino structure, RPM is usually at payload offset 14 and 15 (bytes 17 and 18 in array)
+    uint16_t map = (dataArray[8] << 8) | dataArray[7]; // Manifold Absolute Pressure
+    uint8_t iat = dataArray[9]; // Intake Air Temperature
+    uint8_t clt = dataArray[10]; // Coolant Temperature
+    uint16_t rpm = (dataArray[18] << 8) | dataArray[17]; // Engine RPM 
+    uint16_t vss = (dataArray[104] << 8) | dataArray[103]; // Vehicle Speed Sensor
+    uint8_t fuelpress = dataArray[106]; // Fuel Pressure
+    uint8_t oilpress = dataArray[107]; // Oil Pressure
+    Serial.print("MAP: "); Serial.print(map); Serial.print(" ");
+    Serial.print("IAT: "); Serial.print(iat); Serial.print(" ");
+    Serial.print("CLT: "); Serial.print(clt); Serial.print(" ");
+    Serial.print("RPM: "); Serial.println(rpm); Serial.print(" ");
+    Serial.print("VSS: "); Serial.println(vss); Serial.print(" ");
+    Serial.print("FuelP: "); Serial.print(fuelpress); Serial.print(" ");
+    Serial.print("OilP: "); Serial.println(oilpress); Serial.print(" ");
   } else {
     Serial.println("Error: Invalid header received.");
   }
