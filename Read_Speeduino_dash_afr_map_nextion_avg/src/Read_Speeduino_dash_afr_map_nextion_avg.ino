@@ -1,6 +1,5 @@
 
 #include <Arduino.h>
-#include <U8g2lib.h>
 #include <Servo.h>
 #include <Servo.h>
 
