@@ -65,14 +65,20 @@ void processSpeeduinoData() {
     // Example: Read RPM (Engine status structure shifts by 3 header bytes)
     // In Speeduino structure, RPM is usually at payload offset 14 and 15 (bytes 17 and 18 in array)
     uint16_t map = (dataArray[8] << 8) | dataArray[7]; // Manifold Absolute Pressure
-    uint8_t iat = dataArray[9]; // Intake Air Temperature
-    uint8_t clt = dataArray[10]; // Coolant Temperature
-    float volt = (dataArray[12])/10; // Battery Voltage
-    float afr = (dataArray[13]); // Air-Fuel Ratio
+    uint8_t iat_raw = dataArray[9]; // Intake Air Temperature
+    int iat = iat_raw - 40; // Convert to Celsius
+    uint8_t clt_raw = dataArray[10]; // Coolant Temperature
+    int clt = clt_raw - 40; // Convert to Celsius
+    uint8_t volt_raw = (dataArray[12]); // Battery Voltage
+    float volt = volt_raw * 0.1; // Convert to volts
+    uint8_t afr_raw = dataArray[13]; // Air-Fuel Ratio
+    float afr = afr_raw * 0.1; // Convert to AFR
     uint16_t rpm = (dataArray[18] << 8) | dataArray[17]; // Engine RPM 
     uint16_t vss = (dataArray[104] << 8) | dataArray[103]; // Vehicle Speed Sensor
-    uint8_t fuelpress = dataArray[106]; // Fuel Pressure
-    uint8_t oilpress = dataArray[107]; // Oil Pressure
+    uint8_t fuelp_raw = dataArray[106]; // Fuel Pressure
+    float fuelpress = fuelp_raw * 0.1; // Convert to Fuel Pressure
+    uint8_t oilp_raw = dataArray[107]; // Oil Pressure
+    float oilpress = oilp_raw * 0.1; // Convert to Oil Pressure 
     Serial.print("MAP: "); Serial.print(map); Serial.print(" ");
     Serial.print("IAT: "); Serial.print(iat); Serial.print(" ");
     Serial.print("CLT: "); Serial.print(clt); Serial.print(" ");
