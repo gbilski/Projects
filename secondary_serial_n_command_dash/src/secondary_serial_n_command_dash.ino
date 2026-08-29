@@ -67,8 +67,8 @@ void processSpeeduinoData() {
     uint16_t map = (dataArray[8] << 8) | dataArray[7]; // Manifold Absolute Pressure
     uint8_t iat = dataArray[9]; // Intake Air Temperature
     uint8_t clt = dataArray[10]; // Coolant Temperature
-    uint8_t volt = dataArray[12]; // Battery Voltage
-    uint8_t afr = dataArray[13]; // Air-Fuel Ratio
+    float volt = (dataArray[12])/10; // Battery Voltage
+    float afr = (dataArray[13]); // Air-Fuel Ratio
     uint16_t rpm = (dataArray[18] << 8) | dataArray[17]; // Engine RPM 
     uint16_t vss = (dataArray[104] << 8) | dataArray[103]; // Vehicle Speed Sensor
     uint8_t fuelpress = dataArray[106]; // Fuel Pressure
