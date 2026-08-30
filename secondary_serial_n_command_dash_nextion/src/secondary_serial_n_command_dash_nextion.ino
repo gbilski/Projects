@@ -24,12 +24,12 @@ unsigned long responseTimeout = 200;      // 200ms safety timeout
 //Array values
 uint16_t mapkpa;
 uint8_t iat_raw;
-int iat;
+float iat;
 uint8_t clt_raw;
 int clt;
 uint8_t volt_raw;
 float volt;
-uint8_t afr_raw;
+unsigned int afr_raw;
 float afr;
 uint16_t rpm;
 uint16_t vss;
@@ -134,10 +134,10 @@ void loop() {
     // 3. Process array once all bytes are collected
     if (byteCount >= TOTAL_BYTES_EXPECTED) {
       processSpeeduinoData();
-      waitingForResponse = false; // Ready for next request
       displayData();
       servoData();
       sendCmd();
+      waitingForResponse = false; // Ready for next request
     }
   }
 
