@@ -24,12 +24,12 @@ unsigned long responseTimeout = 200;      // 200ms safety timeout
 //Array values
 uint16_t mapkpa;
 uint8_t iat_raw;
-float iat;
+int8_t iat;
 uint8_t clt_raw;
-int clt;
+int8_t clt;
 uint8_t volt_raw;
 float volt;
-unsigned int afr_raw;
+uint8_t afr_raw;
 float afr;
 uint16_t rpm;
 uint16_t vss;
@@ -59,9 +59,9 @@ void processSpeeduinoData() {
     rpm = (dataArray[18] << 8) | dataArray[17]; // Engine RPM 
     vss = (dataArray[104] << 8) | dataArray[103]; // Vehicle Speed Sensor
     fuelp_raw = dataArray[106]; // Fuel Pressure
-    fuelpress = fuelp_raw * 0.1; // Convert to Fuel Pressure
+    fuelpress = fuelp_raw * 0.069; // Convert to Fuel Pressure
     oilp_raw = dataArray[107]; // Oil Pressure
-    oilpress = oilp_raw * 0.1; // Convert to Oil Pressure 
+    oilpress = oilp_raw * 0.069; // Convert to Oil Pressure 
   } else {
     Serial.println("Error: Invalid header received.");
   }
