@@ -101,8 +101,8 @@ void servoData() {
 }
 
 void setup() {
-  Serial.begin(115200);          // Debugging to PC
-  nexSerial.begin(BAUDRATE);        // Connection to Nextion display
+  Serial.begin(BAUDRATE);          // Debugging to PC
+  nexSerial.begin(38400);        // Connection to Nextion display
   SPEEDUINO_SERIAL.begin(BAUDRATE); // Connection to Speeduino
   Serial.println("Mega 2560 Speeduino Reader Initialized.");
   // Servo for dash gauge
