@@ -1,10 +1,15 @@
 #include <Arduino.h>
+#include <Servo.h>
 
 // Configurations for Speeduino Secondary Serial
 #define SPEEDUINO_SERIAL Serial1 
 #define BAUDRATE 115200          // Standard Speeduino secondary baud rate
 #define nexSerial Serial2        // 
 
+Servo servo0; //creates first servo object to control servo
+Servo servo1; //creates second servo object to control servo
+int servo0_val;
+int servo1_val;
 // Array and sizing configuration
 const int TOTAL_BYTES_EXPECTED = 126; // Total bytes including 3 header bytes
 uint8_t dataArray[TOTAL_BYTES_EXPECTED];
@@ -89,11 +94,20 @@ void sendCmd() { // wrapper to send commands to Nextion screen
   nexSerial.write(0xff);nexSerial.write(0xff); nexSerial.write(0xff);
 }
 
+void servoData() {
+  servo0_val = map(rpm, 0, 7500, 2500, 550);  //converts RPM to output value in micro seconds
+  servo0.writeMicroseconds(servo0_val);  //sets the servo position
+  delay(25);
+}
+
 void setup() {
   Serial.begin(115200);          // Debugging to PC
   nexSerial.begin(BAUDRATE);        // Connection to Nextion display
   SPEEDUINO_SERIAL.begin(BAUDRATE); // Connection to Speeduino
   Serial.println("Mega 2560 Speeduino Reader Initialized.");
+  // Servo for dash gauge
+  servo0.attach(8);  //output to servo on pin 9
+  servo1.attach(10);  //output to servo on pin 11
 }
 
 void loop() {
@@ -122,6 +136,7 @@ void loop() {
       processSpeeduinoData();
       waitingForResponse = false; // Ready for next request
       displayData();
+      servoData();
       sendCmd();
     }
   }
