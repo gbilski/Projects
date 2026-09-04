@@ -22,22 +22,22 @@ bool waitingForResponse = false;
 unsigned long responseTimeout = 200;      // 200ms safety timeout
 
 //Array values
-uint16_t mapkpa;
-uint8_t iat_raw;
-int8_t iat;
-uint8_t clt_raw;
-int8_t clt;
-uint8_t volt_raw;
+int mapkpa;
+int iat_raw;
+int iat;
+int clt_raw;
+int clt;
+int volt_raw;
 float volt;
-uint8_t afr_raw;
+int afr_raw;
 float afr;
-uint16_t rpm;
-uint16_t vss;
-uint8_t fuelp_raw;
+int rpm;
+int vss;
+int fuelp_raw;
 float fuelpress;
-uint8_t oilp_raw;
+int oilp_raw;
 float oilpress;
-uint8_t peakboost;
+int peakboost;
 
 void processSpeeduinoData() {
   // Validate the 3-byte header echo
@@ -47,7 +47,7 @@ void processSpeeduinoData() {
     
     // Example: Read RPM (Engine status structure shifts by 3 header bytes)
     // In Speeduino structure, RPM is usually at payload offset 14 and 15 (bytes 17 and 18 in array)
-    mapkpa = (dataArray[8] << 8) | dataArray[7]; // Manifold Absolute Pressure
+    mapkpa = ((dataArray[8] << 8) | (dataArray[7])); // Manifold Absolute Pressure
     iat_raw = dataArray[9]; // Intake Air Temperature
     iat = iat_raw - 40; // Convert to Celsius
     clt_raw = dataArray[10]; // Coolant Temperature
@@ -56,8 +56,8 @@ void processSpeeduinoData() {
     volt = volt_raw * 0.1; // Convert to volts
     afr_raw = dataArray[13]; // Air-Fuel Ratio
     afr = afr_raw * 0.1; // Convert to AFR
-    rpm = (dataArray[18] << 8) | dataArray[17]; // Engine RPM 
-    vss = (dataArray[104] << 8) | dataArray[103]; // Vehicle Speed Sensor
+    rpm = ((dataArray[18] << 8) | (dataArray[17])); // Engine RPM 
+    vss = ((dataArray[104] << 8) | (dataArray[103])); // Vehicle Speed Sensor
     fuelp_raw = dataArray[106]; // Fuel Pressure
     fuelpress = fuelp_raw * 0.069; // Convert to Fuel Pressure
     oilp_raw = dataArray[107]; // Oil Pressure
