@@ -23,6 +23,7 @@ unsigned long responseTimeout = 200;      // 200ms safety timeout
 
 //Array values
 int mapkpa;
+int baro;
 int iat_raw;
 int iat;
 int clt_raw;
@@ -48,10 +49,10 @@ void processSpeeduinoData() {
     // Example: Read RPM (Engine status structure shifts by 3 header bytes)
     // In Speeduino structure, RPM is usually at payload offset 14 and 15 (bytes 17 and 18 in array)
     mapkpa = ((dataArray[8] << 8) | (dataArray[7])); // Manifold Absolute Pressure
+    baro = dataArray[43]; // Barometric Pressure
     iat_raw = dataArray[9]; // Intake Air Temperature
-    iat = iat_raw - 40; // Convert to Celsius
-    clt_raw = dataArray[10]; // Coolant Temperature
-    clt = clt_raw - 40; // Convert to Celsius
+    iat = iat_raw -40; // Store IAT for display
+    clt = dataArray[10] -40; // Coolant Temperature
     volt_raw = (dataArray[12]); // Battery Voltage
     volt = volt_raw * 0.1; // Convert to volts
     afr_raw = dataArray[13]; // Air-Fuel Ratio
@@ -71,6 +72,7 @@ void processSpeeduinoData() {
 
 void displayData() {
     Serial.print("MAP: "); Serial.print(mapkpa); Serial.print(" ");
+    Serial.print("Baro: "); Serial.print(baro); Serial.print(" ");
     Serial.print("IAT: "); Serial.print(iat); Serial.print(" ");
     Serial.print("CLT: "); Serial.print(clt); Serial.print(" ");
     Serial.print("Volt: "); Serial.print(volt); Serial.print(" ");
@@ -86,9 +88,9 @@ void sendCmd() { // wrapper to send commands to Nextion screen
   nexSerial.write(0xff);nexSerial.write(0xff); nexSerial.write(0xff);
   nexSerial.print("n0.val="); nexSerial.print(mapkpa);
   nexSerial.write(0xff);nexSerial.write(0xff); nexSerial.write(0xff);
-  nexSerial.print("n1.val=");nexSerial.print(iat,0);
+  nexSerial.print("n1.val=");nexSerial.print(iat);
   nexSerial.write(0xff);nexSerial.write(0xff); nexSerial.write(0xff);
-  nexSerial.print("x1.val="); nexSerial.print(volt);
+  nexSerial.print("x1.val="); nexSerial.print(volt_raw);
   nexSerial.write(0xff);nexSerial.write(0xff); nexSerial.write(0xff);
   nexSerial.print("n3.val="); nexSerial.print(peakboost);
   nexSerial.write(0xff);nexSerial.write(0xff); nexSerial.write(0xff);
