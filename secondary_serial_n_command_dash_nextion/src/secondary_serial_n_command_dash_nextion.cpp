@@ -93,6 +93,9 @@ void displayData() {
     Serial.print("VSS: "); Serial.print(vss); Serial.print(" ");
     Serial.print("FuelP: "); Serial.print(fuelpress); Serial.print(" ");
     Serial.print("OilP: "); Serial.println(oilpress);
+    Serial.println("Lights: "); Serial.print(pinLightsstate); Serial.print(" ");
+    Serial.print("AC: "); Serial.print(digitalRead(pinAC)); Serial.print(" ");
+    Serial.print("AC Fan: "); Serial.println(digitalRead(pinACoff));
 }
 
 void sendCmd() { // wrapper to send commands to Nextion screen
