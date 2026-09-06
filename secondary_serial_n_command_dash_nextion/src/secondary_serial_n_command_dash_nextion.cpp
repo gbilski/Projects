@@ -33,12 +33,23 @@ float volt;
 int afr_raw;
 float afr;
 int rpm;
+int tps;
 int vss;
 int fuelp_raw;
 float fuelpress;
 int oilp_raw;
 float oilpress;
 int peakboost;
+
+// AC control pins
+int pinAC = 2;    //from the AC switch
+int pinACoff = 4; //from the AC fan switch
+int pinACon = 3;  //AC on/off signal to Speeduino
+
+//Park lights
+int pinLights = 24;  //Park lights on
+boolean pinLightsstate = LOW;
+boolean pinLightsnew = LOW;
 
 void processSpeeduinoData() {
   // Validate the 3-byte header echo
@@ -58,6 +69,7 @@ void processSpeeduinoData() {
     afr_raw = dataArray[13]; // Air-Fuel Ratio
     afr = afr_raw * 0.1; // Convert to AFR
     rpm = ((dataArray[18] << 8) | (dataArray[17])); // Engine RPM 
+    tps = dataArray[27]; // Throttle Position Sensor
     vss = ((dataArray[104] << 8) | (dataArray[103])); // Vehicle Speed Sensor
     fuelp_raw = dataArray[106]; // Fuel Pressure
     fuelpress = fuelp_raw * 0.069; // Convert to Fuel Pressure
@@ -102,6 +114,32 @@ void servoData() {
   delay(25);
 }
 
+void manageAC() {   // Read the AC inputs and turn AC on/off
+ if (digitalRead(pinAC)==LOW && digitalRead(pinACoff)==HIGH && (tps)<80) {
+    digitalWrite(pinACon,LOW);
+    } 
+ else {
+    digitalWrite(pinACon,HIGH);
+ }
+}
+
+void sendLights()  //read park lights state and control brightness of screens
+{
+  pinLightsnew = digitalRead(pinLights);
+
+  if (pinLightsnew != pinLightsstate) {
+    if (pinLightsnew == HIGH){ 
+                              nexSerial.print("dim=100");
+                              nexSerial.print("\xFF\xFF\xFF");
+                              }
+    else {
+          nexSerial.print("dim=10");
+          nexSerial.print("\xFF\xFF\xFF");
+          }
+    pinLightsstate = pinLightsnew;
+  }
+}
+
 void setup() {
   Serial.begin(BAUDRATE);          // Debugging to PC
   nexSerial.begin(38400);        // Connection to Nextion display
@@ -110,6 +148,12 @@ void setup() {
   // Servo for dash gauge
   servo0.attach(8);  //output to servo on pin 9
   servo1.attach(10);  //output to servo on pin 11
+  //AC control pins
+  pinMode(pinACon, OUTPUT);
+  pinMode(pinAC, INPUT_PULLUP);
+  pinMode(pinACoff, INPUT_PULLUP);
+  //Park lights
+  pinMode(pinLights, INPUT_PULLUP);
 }
 
 void loop() {
@@ -139,6 +183,7 @@ void loop() {
       displayData();
       servoData();
       sendCmd();
+      sendLights();
       waitingForResponse = false; // Ready for next request
     }
   }
